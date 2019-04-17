@@ -8,37 +8,37 @@
 using namespace jthread;
 
 // -----for storing node with c++ map-----
-struct NodePos {
-public:
-	NodePos(int x, int y, int z) :
-			x(x), y(y), z(z) {
-	}
-	int x;
-	int y;
-	int z;
-
-	bool operator<(const NodePos& t) const {
-		if ((this->x == t.x) && (this->y == t.y))
-			return (this->z < t.z);
-		else if (this->x == t.x)
-			return (this->y < t.y);
-		else
-			return (this->x < t.x);
-	}
-
-	bool operator!=(const NodePos& t) const {
-		if ((this->x == t.x) && (this->y == t.y) && (this->z == t.z))
-			return false;
-		else
-			return true;
-	}
-	bool operator =(const NodePos& t) const {
-		if ((this->x == t.x) && (this->y == t.y) && (this->z == t.z))
-			return true;
-		else
-			return false;
-	}
-};
+//struct NodePos {
+//public:
+//	NodePos(int x, int y, int z) :
+//			x(x), y(y), z(z) {
+//	}
+//	int x;
+//	int y;
+//	int z;
+//
+//	bool operator<(const NodePos& t) const {
+//		if ((this->x == t.x) && (this->y == t.y))
+//			return (this->z < t.z);
+//		else if (this->x == t.x)
+//			return (this->y < t.y);
+//		else
+//			return (this->x < t.x);
+//	}
+//
+//	bool operator!=(const NodePos& t) const {
+//		if ((this->x == t.x) && (this->y == t.y) && (this->z == t.z))
+//			return false;
+//		else
+//			return true;
+//	}
+//	bool operator =(const NodePos& t) const {
+//		if ((this->x == t.x) && (this->y == t.y) && (this->z == t.z))
+//			return true;
+//		else
+//			return false;
+//	}
+//};
 
 class Client;
 
@@ -176,7 +176,8 @@ private:
 	JMutex m_con_mutex;
 
 	// -----for saving map, omit air node-----
-	std::map<NodePos, int> m_nodes;
+//	std::map<NodePos, int> m_nodes;
+	std::map<std::array<int,3>, int> m_nodes;
 
 	core::map<v3s16, float> m_fetchblock_history;
 	//core::list<v3s16> m_fetchblock_queue;

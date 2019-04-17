@@ -172,11 +172,11 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		p.Z = readS16(&data[6]);
 
 		// -----remove air node to reduce size-----
-		NodePos idx = new NodePos(p.X, p.Y, p.Z);
-		std::map<NodePos, int> it;
-		it = m_nodes.find(idx);
-		if (it != m_nodes.end())
-			m_nodes.erase(it);
+//		NodePos idx = new NodePos(p.X, p.Y, p.Z);
+//		std::map<NodePos, int> it;
+//		it = m_nodes.find(idx);
+//		if (it != m_nodes.end())
+//			m_nodes.erase(it);
 
 		{
 			JMutexAutoLock envlock(m_env_mutex);
@@ -194,7 +194,8 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		// -----don't add air node to reduce size-----
 		int nodeType = getNodeType((&data[8])[0]);
 		if (nodeType != 254) {
-			m_nodes[NodePos(p.X, p.Y, p.Z)] = nodeType;
+//			m_nodes[NodePos(p.X, p.Y, p.Z)] = nodeType;
+			m_nodes[{p.X, p.Y, p.Z}] = nodeType;
 		}
 
 		MapNode n;
@@ -295,8 +296,10 @@ int Client::getNodeType(u8 node) {
 void Client::saveMap() {
 	dmap << "{";
 	for (auto itr = m_nodes.begin(); itr != m_nodes.end(); itr++) {
-		dmap << "{0:{" << (itr->first).x << "," << (itr->first).y << ","
-				<< (itr->first).z << "},1:" << itr->second << "},";
+//		dmap << "{0:{" << (itr->first).x << "," << (itr->first).y << ","
+//				<< (itr->first).z << "},1:" << itr->second << "},";
+		dmap << "{0:{" << (itr->first)[0] << "," << (itr->first)[1] << ","
+				<< (itr->first)[2] << "},1:" << itr->second << "},";
 	}
 	dmap << "}";
 }
@@ -337,7 +340,8 @@ bool Client::AsyncProcessData() {
 							(&data[8])[z * MAP_BLOCKSIZE * MAP_BLOCKSIZE
 									+ y * MAP_BLOCKSIZE + x]);
 					if (val != 254)
-						m_nodes[NodePos(minX + x, minY + y, minZ + z)] = val;
+						m_nodes[ { minX + x, minY + y, minZ + z }] = val;
+//						m_nodes[NodePos(minX + x, minY + y, minZ + z)] = val;
 				} // for(int x=0;x<MAP_BLOCKSIZE;x++
 			} // for(int y=0;y<MAP_BLOCKSIZE;y++)
 		} // for(int z=0;z<MAP_BLOCKSIZE;z++)
@@ -432,11 +436,13 @@ void Client::removeNode(v3s16 nodepos) {
 	}
 
 	// -----don't add air node-----
-	NodePos idx = new NodePos( nodepos.X, nodepos.Y, nodepos.Z );
-	std::map<NodePos, int> it;
-	it = m_nodes.find(idx);
-	if (it != m_nodes.end())
-		m_nodes.erase(it);
+//	NodePos idx = new NodePos( nodepos.X, nodepos.Y, nodepos.Z );
+//	std::map<NodePos, int> it;
+//	int idx[3] = { nodepos.X, nodepos.Y, nodepos.Z };
+//	std::map<std::array<int, 3>, int> it;
+//	it = m_nodes.find(idx);
+//	if (it != m_nodes.end())
+//		m_nodes.erase(it);
 
 	SharedBuffer<u8> data(8);
 	writeU16(&data[0], TOSERVER_REMOVENODE);
@@ -458,7 +464,8 @@ void Client::addNode(v3s16 nodepos, MapNode n) {
 
 	// -----don't save air node to reduce size-----
 	if (getNodeType(n.d) != 254)
-		m_nodes[NodePos(nodepos.X, nodepos.Y, nodepos.Z)] = getNodeType(n.d);
+//		m_nodes[NodePos(nodepos.X, nodepos.Y, nodepos.Z)] = getNodeType(n.d);
+		m_nodes[{nodepos.X, nodepos.Y, nodepos.Z}] = getNodeType(n.d);
 
 	u8 datasize = 8 + MapNode::serializedLength();
 	SharedBuffer<u8> data(datasize);
