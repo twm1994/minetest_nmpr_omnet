@@ -1,0 +1,24 @@
+main.h/main.cpp
+  # /* Host selection */
+  skip address and port user input
+
+  # /* Create the camera node */
+  add camera zooming and rotation constants
+
+  # while loop in main()
+  add special keys for player rotaion and camera control
+  modify camera position and rotation calculation
+
+client.h/client.cpp
+  add getNpcs()
+
+environment.h/environment.cpp
+  add getNpcs(), addNpc(), m_npcs
+  call Npc::randomwalk() in step()
+
+player.h/player.cpp
+  add getRotation(), setRotation(), updateSceneNodePosition(), m_rotation
+  # constructor
+  change mesh and texture
+
+
