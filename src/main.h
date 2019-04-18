@@ -18,6 +18,7 @@ extern s16 g_viewing_range_nodes;
 extern JMutex g_viewing_range_nodes_mutex;
 
 #include <fstream>
+#include <json/json.h>
 
 // Debug streams
 extern std::ostream dmap;

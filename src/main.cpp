@@ -55,7 +55,7 @@ u16 g_selected_material = 0;
  */
 
 std::ofstream dfile("debug.txt");
-std::ofstream dfile_map("map.txt");
+std::ofstream dfile_map("map.json");
 
 std::ostream dmap(dfile_map.rdbuf());
 //std::ofstream dfile_con("debug_con.txt");

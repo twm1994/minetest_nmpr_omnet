@@ -1,10 +1,10 @@
 #ifndef CLIENT_HEADER
 #define CLIENT_HEADER
-#include <map>
 #include "connection.h"
 #include "environment.h"
 #include "common_irrlicht.h"
 #include <jmutex.h>
+#include "main.h"
 using namespace jthread;
 
 // -----for storing node with c++ map-----

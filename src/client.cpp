@@ -7,7 +7,6 @@ namespace jthread {
 } // JThread 1.2 support
 using namespace jthread;
 // JThread 1.3 support
-#include "main.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -283,6 +282,8 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		m_incoming_queue.push_back(packet);
 	}
 }
+
+// -----for saving map-----
 s16 Client::getNodeType(u8 node) {
 	s16 nodeType;
 	switch (node) {
@@ -313,22 +314,39 @@ s16 Client::getNodeType(u8 node) {
 //}
 
 void Client::saveMap() {
-	dmap << "{";
+	Json::FastWriter fastWriter;
+	Json::Value map;
 	core::map<v3s16, s16>::Iterator i;
 	i = m_nodes.getIterator();
 	for (; i.atEnd() == false; i++) {
 		v3s16 p = i.getNode()->getKey();
 		s16 v = i.getNode()->getValue();
-		dmap << "{0:{" << p.X << "," << p.Y << "," << p.Z << "},1:" << v
-				<< "},";
+		Json::Value node;
+		Json::Value pos;
+		pos[0] = p.X;
+		pos[1] = p.Y;
+		pos[2] = p.Z;
+		node["0"] = pos;
+		node["1"] = v;
+		map.append(node);
 	}
-//	for (auto itr = m_nodes.begin(); itr != m_nodes.end(); itr++) {
-//		dmap << "{0:{" << (itr->first).x << "," << (itr->first).y << ","
-//				<< (itr->first).z << "},1:" << itr->second << "},";
-//		dmap << "{0:{" << (itr->first)[0] << "," << (itr->first)[1] << ","
-//				<< (itr->first)[2] << "},1:" << itr->second << "},";
+	dmap << fastWriter.write(map);
+//	dmap << "{";
+//	core::map<v3s16, s16>::Iterator i;
+//	i = m_nodes.getIterator();
+//	for (; i.atEnd() == false; i++) {
+//		v3s16 p = i.getNode()->getKey();
+//		s16 v = i.getNode()->getValue();
+//		dmap << "{0:{" << p.X << "," << p.Y << "," << p.Z << "},1:" << v
+//				<< "},";
 //	}
-	dmap << "}";
+////	for (auto itr = m_nodes.begin(); itr != m_nodes.end(); itr++) {
+////		dmap << "{0:{" << (itr->first).x << "," << (itr->first).y << ","
+////				<< (itr->first).z << "},1:" << itr->second << "},";
+////		dmap << "{0:{" << (itr->first)[0] << "," << (itr->first)[1] << ","
+////				<< (itr->first)[2] << "},1:" << itr->second << "},";
+////	}
+//	dmap << "}";
 }
 
 bool Client::AsyncProcessData() {
