@@ -55,10 +55,10 @@ u16 g_selected_material = 0;
  */
 
 std::ofstream dfile("debug.txt");
-std::ofstream fileMapClient("map_client.json");
-std::ostream mapClient(fileMapClient.rdbuf());
-std::ofstream fileMapServer("map_server.json");
-std::ostream mapServer(fileMapServer.rdbuf());
+//std::ofstream fileMapClient("map_client.json");
+//std::ostream mapClient(fileMapClient.rdbuf());
+//std::ofstream fileMapServer("map_server.json");
+//std::ostream mapServer(fileMapServer.rdbuf());
 
 // Connection
 std::ostream dout_con(dfile.rdbuf());
@@ -339,6 +339,15 @@ int main() {
 			return 0;
 		}
 		client.connect(connect_address);
+
+		// -----Test load map-----
+		u32 timestart = device->getTimer()->getTime();
+		server->loadMap();
+		client.loadMap();
+		u32 timeLoaded = device->getTimer()->getTime();
+		std::cout << "----------Time used: " << timeLoaded - timestart
+				<< std::endl;
+		device->getTimer()->stop();
 
 		player = client.getLocalPlayer();
 		player->animateStand();

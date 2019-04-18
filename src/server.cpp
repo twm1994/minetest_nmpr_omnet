@@ -109,7 +109,8 @@ void Server::saveMap() {
 		node["1"] = v;
 		map.append(node);
 	}
-	writer->write(map, &mapServer);
+	std::ofstream ofs("map_server.json");
+	writer->write(map, &ofs);
 }
 
 void Server::loadMap() {

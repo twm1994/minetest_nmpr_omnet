@@ -312,7 +312,8 @@ void Client::saveMap() {
 		node["1"] = v;
 		map.append(node);
 	}
-	writer->write(map, &mapClient);
+	std::ofstream ofs("map_client.json");
+	writer->write(map, &ofs);
 }
 
 void Client::loadMap() {

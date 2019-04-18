@@ -20,9 +20,9 @@ extern JMutex g_viewing_range_nodes_mutex;
 #include <fstream>
 #include <json/json.h>
 
-// -----File stream-----
-extern std::ostream mapClient;
-extern std::ostream mapServer;
+//// -----File stream-----
+//extern std::ostream mapClient;
+//extern std::ostream mapServer;
 // Debug streams
 extern std::ostream dout_con;
 extern std::ostream dout_client;
