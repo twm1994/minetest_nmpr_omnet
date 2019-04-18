@@ -55,10 +55,8 @@ u16 g_selected_material = 0;
  */
 
 std::ofstream dfile("debug.txt");
-//std::ofstream fileMapClient("map_client.json");
-//std::ostream mapClient(fileMapClient.rdbuf());
-//std::ofstream fileMapServer("map_server.json");
-//std::ostream mapServer(fileMapServer.rdbuf());
+std::ofstream dmap("mapdb.txt");
+std::ostream dout_map(dmap.rdbuf());
 
 // Connection
 std::ostream dout_con(dfile.rdbuf());

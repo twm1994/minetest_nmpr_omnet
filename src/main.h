@@ -24,6 +24,7 @@ extern JMutex g_viewing_range_nodes_mutex;
 //extern std::ostream mapClient;
 //extern std::ostream mapServer;
 // Debug streams
+extern std::ostream dout_map;
 extern std::ostream dout_con;
 extern std::ostream dout_client;
 extern std::ostream dout_server;
