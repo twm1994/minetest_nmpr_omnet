@@ -6,43 +6,38 @@
 
 class Server;
 
-class ServerNetworkThread : public JThread
-{
+class ServerNetworkThread: public JThread {
 	bool run;
 	JMutex run_mutex;
-
 	Server *m_server;
 
 public:
 
-	ServerNetworkThread(Server *server) : JThread(), run(true), m_server(server)
-	{
+	ServerNetworkThread(Server *server) :
+			JThread(), run(true), m_server(server) {
 		run_mutex.Init();
 	}
 
 	void * Thread();
 
-	bool getRun()
-	{
+	bool getRun() {
 		run_mutex.Lock();
 		bool run_cached = run;
 		run_mutex.Unlock();
 		return run_cached;
 	}
-	void setRun(bool a_run)
-	{
+	void setRun(bool a_run) {
 		run_mutex.Lock();
 		run = a_run;
 		run_mutex.Unlock();
 	}
 };
 
-class Server
-{
+class Server {
 public:
 	/*
-		NOTE: Every public method should be thread-safe
-	*/
+	 NOTE: Every public method should be thread-safe
+	 */
 	Server();
 	~Server();
 	void start(unsigned short port);
@@ -51,19 +46,28 @@ public:
 	void AsyncRunStep();
 	void Receive();
 	void ProcessData(u8 *data, u32 datasize, u16 peer_id);
+
+	// -----for saving map-----
+	void saveMap();
 private:
-	
 	void SendPlayerPositions(float dtime);
-	
+
+	// -----for saving map-----
+	s16 getNodeType(u8 node);
+
+	// -----get MapNode position range of the given MapBlock position-----
+	s16 minVal(s16 v) {
+		return v * MAP_BLOCKSIZE;
+	}
+
+	// -----container for MapNode excluding air node-----
+	core::map<v3s16, s16> m_nodes;
 	Environment m_env;
 	JMutex m_env_mutex;
-
 	con::Connection m_con;
 	JMutex m_con_mutex;
-
 	float m_step_dtime;
 	JMutex m_step_dtime_mutex;
-
 	ServerNetworkThread m_thread;
 };
 

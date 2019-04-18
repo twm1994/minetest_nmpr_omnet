@@ -45,6 +45,7 @@ locale/
 irrlicht-1.8.4/
 jthread-1.3.3/
 *.htm
+client_server_change.txt
 
 ## Dynamic files
 Backup/

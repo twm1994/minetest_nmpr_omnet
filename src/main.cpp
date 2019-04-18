@@ -55,9 +55,10 @@ u16 g_selected_material = 0;
  */
 
 std::ofstream dfile("debug.txt");
-std::ofstream dfile_map("map.json");
-
-std::ostream dmap(dfile_map.rdbuf());
+std::ofstream fileMapClient("map_client.json");
+std::ostream mapClient(fileMapClient.rdbuf());
+std::ofstream fileMapServer("map_server.json");
+std::ostream mapServer(fileMapServer.rdbuf());
 //std::ofstream dfile_con("debug_con.txt");
 //std::ofstream dfile_server("debug_server.txt");
 //std::ofstream dfile_client("debug_client.txt");
@@ -841,7 +842,10 @@ int main() {
 			} // if (receiver.isPaused) {} else
 
 		}
+
+		// ----save the map at exit-----
 		client.saveMap();
+		server->saveMap();
 		if (server != NULL)
 			delete server;
 
