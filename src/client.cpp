@@ -171,7 +171,7 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		p.Y = readS16(&data[4]);
 		p.Z = readS16(&data[6]);
 
-		// -----don't save air node to reduce file size-----
+		// -----Don't save air node to reduce file size-----
 		core::map<v3s16, s16>::Node *n = m_nodes.find(p);
 		if (n != NULL) {
 			m_nodes.delink(p);
@@ -190,7 +190,7 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		p.Y = readS16(&data[4]);
 		p.Z = readS16(&data[6]);
 
-		// -----don't save air node to reduce file size-----
+		// -----Don't save air node to reduce file size-----
 		int nodeType = getNodeType((&data[8])[0]);
 		if (nodeType != 254) {
 			m_nodes.insert(p, nodeType);
@@ -277,7 +277,7 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 	}
 }
 
-// -----for saving map-----
+// -----For saving map-----
 s16 Client::getNodeType(u8 node) {
 	s16 nodeType;
 	switch (node) {
@@ -295,7 +295,7 @@ s16 Client::getNodeType(u8 node) {
 
 void Client::saveMap() {
 	Json::StreamWriterBuilder builder;
-	builder.settings_["indentation"] = ""; // write in one line
+	builder.settings_["indentation"] = ""; // Write in one line
 	std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
 	Json::Value map;
 	core::map<v3s16, s16>::Iterator i;
@@ -313,6 +313,20 @@ void Client::saveMap() {
 		map.append(node);
 	}
 	writer->write(map, &mapClient);
+}
+
+void Client::loadMap() {
+	std::ifstream ifs("map_client.json");
+	Json::CharReaderBuilder reader;
+	Json::Value map;
+	JSONCPP_STRING errs;
+	Json::parseFromStream(reader, ifs, &map, &errs);
+	for (Json::Value::const_iterator i = map.begin(); i != map.end(); i++) {
+		Json::Value pos = (*i)["0"];
+		v3s16 nodePos = v3s16(pos[0].asInt(), pos[1].asInt(), pos[2].asInt());
+		s16 d = (*i)["1"].asInt();
+		m_nodes.insert(nodePos, d);
+	}
 }
 
 bool Client::AsyncProcessData() {
@@ -343,17 +357,17 @@ bool Client::AsyncProcessData() {
 		s16 minY = minVal(p.Y);
 		s16 minZ = minVal(p.Z);
 
-		// -----indexing in block: z*MAP_BLOCKSIZE*MAP_BLOCKSIZE + y*MAP_BLOCKSIZE + x-----
+		// -----Indexing in block: z*MAP_BLOCKSIZE*MAP_BLOCKSIZE + y*MAP_BLOCKSIZE + x-----
 		for (int z = 0; z < MAP_BLOCKSIZE; z++) {
 			for (int y = 0; y < MAP_BLOCKSIZE; y++) {
 				for (int x = 0; x < MAP_BLOCKSIZE; x++) {
-					// first element of &data[8] is probably_dark
+					// First element of &data[8] is probably_dark
 					int val = getNodeType(
 							(&data[8])[z * MAP_BLOCKSIZE * MAP_BLOCKSIZE
 									+ y * MAP_BLOCKSIZE + x + 1]);
 					v3s16 nodepos = v3s16(minX + x, minY + y, minZ + z);
 					core::map<v3s16, s16>::Node *n = m_nodes.find(nodepos);
-					// don't overwrite existing node or save air node
+					// Don't overwrite existing node or save air node
 					if ((n == NULL) && (val != 254)) {
 						m_nodes.insert(nodepos, val);
 					}
@@ -451,7 +465,7 @@ void Client::removeNode(v3s16 nodepos) {
 		return;
 	}
 
-// -----don't save air node to reduce file size-----
+// -----Don't save air node to reduce file size-----
 	core::map<v3s16, s16>::Node *n = m_nodes.find(nodepos);
 	if (n != NULL) {
 		m_nodes.delink(nodepos);
@@ -475,7 +489,7 @@ void Client::addNode(v3s16 nodepos, MapNode n) {
 		return;
 	}
 
-// -----don't save air node to reduce file size-----
+// -----Don't save air node to reduce file size-----
 	if (getNodeType(n.d) != 254)
 		m_nodes.insert(nodepos, getNodeType(n.d));
 

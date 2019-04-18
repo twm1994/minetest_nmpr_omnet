@@ -47,20 +47,21 @@ public:
 	void Receive();
 	void ProcessData(u8 *data, u32 datasize, u16 peer_id);
 
-	// -----for saving map-----
+	// -----For saving and loading map-----
 	void saveMap();
+	void loadMap();
 private:
 	void SendPlayerPositions(float dtime);
 
-	// -----for saving map-----
+	// -----For saving map-----
 	s16 getNodeType(u8 node);
 
-	// -----get MapNode position range of the given MapBlock position-----
+	// -----Get MapNode position range of the given MapBlock position-----
 	s16 minVal(s16 v) {
 		return v * MAP_BLOCKSIZE;
 	}
 
-	// -----container for MapNode excluding air node-----
+	// -----Container for MapNode excluding air node-----
 	core::map<v3s16, s16> m_nodes;
 	Environment m_env;
 	JMutex m_env_mutex;

@@ -59,50 +59,17 @@ std::ofstream fileMapClient("map_client.json");
 std::ostream mapClient(fileMapClient.rdbuf());
 std::ofstream fileMapServer("map_server.json");
 std::ostream mapServer(fileMapServer.rdbuf());
-//std::ofstream dfile_con("debug_con.txt");
-//std::ofstream dfile_server("debug_server.txt");
-//std::ofstream dfile_client("debug_client.txt");
-//std::ofstream dfile_dummy("debug_dummy.txt");
-//std::ofstream dfile_map_gen("map_gen.txt");
-//
-//std::ostream dout_dummy(dfile_dummy.rdbuf());
-//std::ostream dout_map_gen(dfile_map_gen.rdbuf());
 
 // Connection
 std::ostream dout_con(dfile.rdbuf());
-//std::ostream dout_con(dfile_con.rdbuf());
 
 // Server;
 std::ostream dout_server(dfile.rdbuf());
-//std::ostream dout_server(dfile_server.rdbuf());
 
 // Client
 std::ostream dout_client(dfile.rdbuf());
-//std::ostream dout_client(dfile_client.rdbuf());
 
-/*
- TimeTaker
- */
-
-//class TimeTaker {
-//public:
-//    TimeTaker(const char *name, IrrlichtDevice *dev) {
-//        m_name = name;
-//        m_dev = dev;
-//        m_time1 = m_dev->getTimer()->getRealTime();
-//    }
-//    ~TimeTaker() {
-//        u32 time2 = m_dev->getTimer()->getRealTime();
-//        u32 dtime = time2 - m_time1;
-//        std::cout << m_name << " took " << dtime << "ms" << std::endl;
-//    }
-//private:
-//    const char *m_name;
-//    IrrlichtDevice *m_dev;
-//    u32 m_time1;
-//};
 Player *player;
-
 class MyEventReceiver: public IEventReceiver {
 public:
 	// This is the one method that we have to implement
@@ -295,7 +262,7 @@ int main() {
 
 	gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
 
-	// -----pause menu-----
+	// -----Pause menu-----
 	video::ITexture* image = driver->getTexture("../data/pause.png");
 	u16 imgWidth = 600;
 	u16 imgHeight = 600;
@@ -843,7 +810,7 @@ int main() {
 
 		}
 
-		// ----save the map at exit-----
+		// ----Save the map at exit-----
 		client.saveMap();
 		server->saveMap();
 		if (server != NULL)

@@ -108,13 +108,14 @@ public:
 	core::list<Player*> getPlayers();
 	core::list<Npc*> getNpcs();
 
-	// -----for saving map-----
+	// -----For saving and loading map-----
 	void saveMap();
+	void loadMap();
 private:
-	// -----for saving map-----
+	// -----For saving map-----
 	s16 getNodeType(u8 node);
 
-	// -----get MapNode position range of the given MapBlock position-----
+	// -----Get MapNode position range of the given MapBlock position-----
 	s16 minVal(s16 v) {
 		return v * MAP_BLOCKSIZE;
 	}
@@ -125,7 +126,7 @@ private:
 	// m_con_mutex must be locked when calling these
 	void sendPlayerPos(float dtime);
 
-	// -----container for MapNode excluding air node-----
+	// -----Container for MapNode excluding air node-----
 	core::map<v3s16, s16> m_nodes;
 
 	ClientUpdateThread m_thread;

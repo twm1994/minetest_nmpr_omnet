@@ -74,7 +74,7 @@ void Server::step(float dtime) {
 	}
 }
 
-// -----for saving map-----
+// -----For saving map-----
 s16 Server::getNodeType(u8 node) {
 	s16 nodeType;
 	switch (node) {
@@ -92,7 +92,7 @@ s16 Server::getNodeType(u8 node) {
 
 void Server::saveMap() {
 	Json::StreamWriterBuilder builder;
-	builder.settings_["indentation"] = ""; // write in one line
+	builder.settings_["indentation"] = ""; // Write in one line
 	std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
 	Json::Value map;
 	core::map<v3s16, s16>::Iterator i;
@@ -110,6 +110,20 @@ void Server::saveMap() {
 		map.append(node);
 	}
 	writer->write(map, &mapServer);
+}
+
+void Server::loadMap() {
+	std::ifstream ifs("map_server.json");
+	Json::CharReaderBuilder reader;
+	Json::Value map;
+	JSONCPP_STRING errs;
+	Json::parseFromStream(reader, ifs, &map, &errs);
+	for (Json::Value::const_iterator i = map.begin(); i != map.end(); i++) {
+		Json::Value pos = (*i)["0"];
+		v3s16 nodePos = v3s16(pos[0].asInt(), pos[1].asInt(), pos[2].asInt());
+		s16 d = (*i)["1"].asInt();
+		m_nodes.insert(nodePos, d);
+	}
 }
 
 void Server::AsyncRunStep() {
@@ -198,17 +212,17 @@ void Server::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 			writeS16(&reply[6], p.Z);
 			block->serialize(&reply[8]);
 
-			// -----indexing in block: z*MAP_BLOCKSIZE*MAP_BLOCKSIZE + y*MAP_BLOCKSIZE + x-----
+			// -----Indexing in block: z*MAP_BLOCKSIZE*MAP_BLOCKSIZE + y*MAP_BLOCKSIZE + x-----
 			for (int z = 0; z < MAP_BLOCKSIZE; z++) {
 				for (int y = 0; y < MAP_BLOCKSIZE; y++) {
 					for (int x = 0; x < MAP_BLOCKSIZE; x++) {
-						// first element of &reply[8] is probably_dark
+						// First element of &reply[8] is probably_dark
 						int val = getNodeType(
 								(&reply[8])[z * MAP_BLOCKSIZE * MAP_BLOCKSIZE
 										+ y * MAP_BLOCKSIZE + x + 1]);
 						v3s16 nodepos = v3s16(minX + x, minY + y, minZ + z);
 						core::map<v3s16, s16>::Node *n = m_nodes.find(nodepos);
-						// don't overwrite existing node or save air node
+						// Don't overwrite existing node or save air node
 						if ((n == NULL) && (val != 254)) {
 							m_nodes.insert(nodepos, val);
 						}
@@ -228,7 +242,7 @@ void Server::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 			p.Y = readS16(&data[4]);
 			p.Z = readS16(&data[6]);
 
-			// -----don't save air node to reduce file size-----
+			// -----Don't save air node to reduce file size-----
 			core::map<v3s16, s16>::Node *node = m_nodes.find(p);
 			if (node != NULL) {
 				m_nodes.delink(p);
@@ -256,7 +270,7 @@ void Server::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 			p.Y = readS16(&data[4]);
 			p.Z = readS16(&data[6]);
 
-			// -----don't save air node to reduce file size-----
+			// -----Don't save air node to reduce file size-----
 			int nodeType = getNodeType((&data[8])[0]);
 			if (nodeType != 254) {
 				m_nodes.insert(p, nodeType);
