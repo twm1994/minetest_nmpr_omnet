@@ -1,6 +1,5 @@
 ## Generic ignorable patterns and files
 .*
-!.cproject
 !.project
 !.gitignore
 *~

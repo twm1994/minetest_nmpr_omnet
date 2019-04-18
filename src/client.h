@@ -154,7 +154,8 @@ public:
 	void saveMap();
 private:
 	// -----for saving map-----
-	int getNodeType(u8 node);
+//	int getNodeType(u8 node);
+	s16 getNodeType(u8 node);
 
 	// -----get MapNode position range of the given MapBlock position
 	int minVal(int v) {
@@ -176,8 +177,9 @@ private:
 	JMutex m_con_mutex;
 
 	// -----for saving map, omit air node-----
+	core::map<v3s16, s16> m_nodes;
 //	std::map<NodePos, int> m_nodes;
-	std::map<std::array<int,3>, int> m_nodes;
+//	std::map<std::array<int,3>, int> m_nodes;
 
 	core::map<v3s16, float> m_fetchblock_history;
 	//core::list<v3s16> m_fetchblock_queue;

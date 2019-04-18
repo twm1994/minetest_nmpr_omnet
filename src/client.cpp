@@ -171,7 +171,11 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		p.Y = readS16(&data[4]);
 		p.Z = readS16(&data[6]);
 
-		// -----remove air node to reduce size-----
+		// -----don't save air node to reduce file size-----
+		core::map<v3s16, s16>::Node *n = m_nodes.find(p);
+		if (n != NULL) {
+			m_nodes.delink(p);
+		}
 //		NodePos idx = new NodePos(p.X, p.Y, p.Z);
 //		std::map<NodePos, int> it;
 //		it = m_nodes.find(idx);
@@ -191,11 +195,12 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		p.Y = readS16(&data[4]);
 		p.Z = readS16(&data[6]);
 
-		// -----don't add air node to reduce size-----
+		// -----don't save air node to reduce file size-----
 		int nodeType = getNodeType((&data[8])[0]);
 		if (nodeType != 254) {
-//			m_nodes[NodePos(p.X, p.Y, p.Z)] = nodeType;
-			m_nodes[{p.X, p.Y, p.Z}] = nodeType;
+			m_nodes.insert(p, nodeType);
+//			m_nodes.insert({NodePos(p.X, p.Y, p.Z), nodeType});
+//			m_nodes[{p.X, p.Y, p.Z}] = nodeType;
 		}
 
 		MapNode n;
@@ -278,8 +283,8 @@ void Client::ProcessData(u8 *data, u32 datasize, u16 peer_id) {
 		m_incoming_queue.push_back(packet);
 	}
 }
-int Client::getNodeType(u8 node) {
-	int nodeType;
+s16 Client::getNodeType(u8 node) {
+	s16 nodeType;
 	switch (node) {
 	case MATERIAL_STONE:
 		nodeType = 0;
@@ -292,15 +297,37 @@ int Client::getNodeType(u8 node) {
 	}
 	return nodeType;
 }
+//int Client::getNodeType(u8 node) {
+//	int nodeType;
+//	switch (node) {
+//	case MATERIAL_STONE:
+//		nodeType = 0;
+//		break;
+//	case MATERIAL_GRASS:
+//		nodeType = 1;
+//		break;
+//	default:
+//		nodeType = 254;
+//	}
+//	return nodeType;
+//}
 
 void Client::saveMap() {
 	dmap << "{";
-	for (auto itr = m_nodes.begin(); itr != m_nodes.end(); itr++) {
+	core::map<v3s16, s16>::Iterator i;
+	i = m_nodes.getIterator();
+	for (; i.atEnd() == false; i++) {
+		v3s16 p = i.getNode()->getKey();
+		s16 v = i.getNode()->getValue();
+		dmap << "{0:{" << p.X << "," << p.Y << "," << p.Z << "},1:" << v
+				<< "},";
+	}
+//	for (auto itr = m_nodes.begin(); itr != m_nodes.end(); itr++) {
 //		dmap << "{0:{" << (itr->first).x << "," << (itr->first).y << ","
 //				<< (itr->first).z << "},1:" << itr->second << "},";
-		dmap << "{0:{" << (itr->first)[0] << "," << (itr->first)[1] << ","
-				<< (itr->first)[2] << "},1:" << itr->second << "},";
-	}
+//		dmap << "{0:{" << (itr->first)[0] << "," << (itr->first)[1] << ","
+//				<< (itr->first)[2] << "},1:" << itr->second << "},";
+//	}
 	dmap << "}";
 }
 
@@ -309,7 +336,7 @@ bool Client::AsyncProcessData() {
 	u8 *data = packet.m_data;
 	u32 datasize = packet.m_datalen;
 
-	// An empty packet means queue is empty
+// An empty packet means queue is empty
 	if (data == NULL) {
 		return false;
 	}
@@ -340,8 +367,11 @@ bool Client::AsyncProcessData() {
 							(&data[8])[z * MAP_BLOCKSIZE * MAP_BLOCKSIZE
 									+ y * MAP_BLOCKSIZE + x]);
 					if (val != 254)
-						m_nodes[ { minX + x, minY + y, minZ + z }] = val;
-//						m_nodes[NodePos(minX + x, minY + y, minZ + z)] = val;
+						m_nodes.insert(v3s16(minX + x, minY + y, minZ + z),
+								val);
+//						m_nodes[ { minX + x, minY + y, minZ + z }] = val;
+//						m_nodes.insert( { NodePos(minX + x, minY + y, minZ + z),
+//								val });
 				} // for(int x=0;x<MAP_BLOCKSIZE;x++
 			} // for(int y=0;y<MAP_BLOCKSIZE;y++)
 		} // for(int z=0;z<MAP_BLOCKSIZE;z++)
@@ -382,17 +412,17 @@ void Client::fetchBlock(v3s16 p) {
 
 	JMutexAutoLock lock(m_fetchblock_mutex);
 
-	// If fetch request was recently sent, cancel
+// If fetch request was recently sent, cancel
 	if (m_fetchblock_history.find(p) != NULL)
 		return;
 
 	con::Peer *peer = m_con.GetPeer(PEER_ID_SERVER);
 	con::Channel *channel = &(peer->channels[1]);
 
-	// Don't allow endless amounts of buffered reliable packets
+// Don't allow endless amounts of buffered reliable packets
 	if (channel->incoming_reliables.size() >= 100)
 		return;
-	// Don't allow endless amounts of non-acked requests
+// Don't allow endless amounts of non-acked requests
 	if (channel->outgoing_reliables.size() >= 10)
 		return;
 
@@ -410,23 +440,23 @@ IncomingPacket Client::getPacket() {
 	JMutexAutoLock lock(m_incoming_queue_mutex);
 
 	core::list<IncomingPacket>::Iterator i;
-	// Refer to first one
+// Refer to first one
 	i = m_incoming_queue.begin();
 
-	// If queue is empty, return empty packet
+// If queue is empty, return empty packet
 	if (i == m_incoming_queue.end()) {
 		IncomingPacket packet;
 		return packet;
 	}
 
-	// Pop out first packet and return it
+// Pop out first packet and return it
 	IncomingPacket packet = *i;
 	m_incoming_queue.erase(i);
 	return packet;
 }
 
 void Client::removeNode(v3s16 nodepos) {
-	// Test that the position exists
+// Test that the position exists
 	try {
 		JMutexAutoLock envlock(m_env_mutex);
 		m_env.getMap().getNode(nodepos);
@@ -435,11 +465,15 @@ void Client::removeNode(v3s16 nodepos) {
 		return;
 	}
 
-	// -----don't add air node-----
-//	NodePos idx = new NodePos( nodepos.X, nodepos.Y, nodepos.Z );
+// -----don't save air node to reduce file size-----
+	core::map<v3s16, s16>::Node *n = m_nodes.find(nodepos);
+	if (n != NULL) {
+		m_nodes.delink(nodepos);
+	}
+//	NodePos idx = new NodePos(nodepos.X, nodepos.Y, nodepos.Z);
 //	std::map<NodePos, int> it;
-//	int idx[3] = { nodepos.X, nodepos.Y, nodepos.Z };
-//	std::map<std::array<int, 3>, int> it;
+////	int idx[3] = { nodepos.X, nodepos.Y, nodepos.Z };
+////	std::map<std::array<int, 3>, int> it;
 //	it = m_nodes.find(idx);
 //	if (it != m_nodes.end())
 //		m_nodes.erase(it);
@@ -453,7 +487,7 @@ void Client::removeNode(v3s16 nodepos) {
 }
 
 void Client::addNode(v3s16 nodepos, MapNode n) {
-	// Test that the position exists
+// Test that the position exists
 	try {
 		JMutexAutoLock envlock(m_env_mutex);
 		m_env.getMap().getNode(nodepos);
@@ -462,10 +496,12 @@ void Client::addNode(v3s16 nodepos, MapNode n) {
 		return;
 	}
 
-	// -----don't save air node to reduce size-----
+// -----don't save air node to reduce file size-----
 	if (getNodeType(n.d) != 254)
-//		m_nodes[NodePos(nodepos.X, nodepos.Y, nodepos.Z)] = getNodeType(n.d);
-		m_nodes[{nodepos.X, nodepos.Y, nodepos.Z}] = getNodeType(n.d);
+		m_nodes.insert(nodepos, getNodeType(n.d));
+	//		m_nodes.insert(
+//				{ NodePos(nodepos.X, nodepos.Y, nodepos.Z), getNodeType(n.d) });
+//		m_nodes[{nodepos.X, nodepos.Y, nodepos.Z}] = getNodeType(n.d);
 
 	u8 datasize = 8 + MapNode::serializedLength();
 	SharedBuffer<u8> data(datasize);
@@ -490,13 +526,13 @@ void Client::sendPlayerPos(float dtime) {
 		our_peer_id = m_con.GetPeerID();
 	}
 
-	// Set peer id if not set already
+// Set peer id if not set already
 	if (myplayer->peer_id == PEER_ID_NEW)
 		myplayer->peer_id = our_peer_id;
-	// Check that an existing peer_id is the same as the connection's
+// Check that an existing peer_id is the same as the connection's
 	assert(myplayer->peer_id == our_peer_id);
 
-	// Update at reasonable intervals (0.2s)
+// Update at reasonable intervals (0.2s)
 	static float counter = 0.0;
 	counter += dtime;
 	if (counter < 0.2)
@@ -519,7 +555,7 @@ void Client::sendPlayerPos(float dtime) {
 	writeU16(&data[0], TOSERVER_PLAYERPOS);
 	writeV3S32(&data[2], position);
 	writeV3S32(&data[2 + 12], speed);
-	// Send as unreliable
+// Send as unreliable
 	Send(0, data, false);
 }
 
